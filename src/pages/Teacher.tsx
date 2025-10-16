@@ -1,9 +1,26 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, ArrowLeft } from "lucide-react";
+import { BookOpen, ArrowLeft, Trash2 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface Submission {
   id: string;
@@ -26,18 +43,19 @@ interface Submission {
 const Teacher = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [submissionToDelete, setSubmissionToDelete] = useState<Submission | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchSubmissions();
 
-    // 실시간 업데이트 설정
     const channel = supabase
       .channel("submissions-changes")
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "submissions",
         },
@@ -65,6 +83,34 @@ const Teacher = () => {
       console.error("데이터 가져오기 실패:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (submissionId: string) => {
+    if (!submissionId) return;
+
+    try {
+      const { error } = await supabase
+        .from("submissions")
+        .delete()
+        .eq("id", submissionId);
+
+      if (error) throw error;
+
+      setSubmissions((prev) => prev.filter((sub) => sub.id !== submissionId));
+      toast({
+        title: "삭제 완료",
+        description: "기획서가 성공적으로 삭제되었습니다.",
+      });
+    } catch (error) {
+      console.error("삭제 실패:", error);
+      toast({
+        title: "삭제 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmissionToDelete(null);
     }
   };
 
@@ -114,149 +160,184 @@ const Teacher = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6">
+          <Accordion type="single" collapsible className="w-full space-y-4">
             {submissions.map((submission) => (
-              <Card
-                key={submission.id}
-                className="rounded-3xl shadow-[var(--shadow-card)] overflow-hidden border-2 hover:border-primary/50 transition-colors"
-              >
-                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 pb-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-2xl font-bold">
-                      작성자: {submission.student_name}
-                    </CardTitle>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDate(submission.created_at)}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-primary">🎮 게임 제목</h3>
-                    <p className="text-base pl-4">{submission.game_title}</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-primary">🦸 주인공 이름</h3>
-                    <p className="text-base pl-4">{submission.protagonist_name}</p>
-                  </div>
-
-                  {submission.protagonist_traits && (
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-primary">
-                        ✨ 주인공의 특징이나 성격
-                      </h3>
-                      <p className="text-base pl-4 whitespace-pre-wrap">
-                        {submission.protagonist_traits}
-                      </p>
-                    </div>
-                  )}
-
-                  {submission.story_background && (
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-primary">
-                        🌍 이야기의 배경
-                      </h3>
-                      <p className="text-base pl-4 whitespace-pre-wrap">
-                        {submission.story_background}
-                      </p>
-                    </div>
-                  )}
-
-                  {(submission.mood.length > 0 || submission.mood_custom) && (
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-bold text-primary">
-                        🎭 어떤 분위기인가요?
-                      </h3>
-                      <div className="pl-4 flex flex-wrap gap-2">
-                        {submission.mood.map((m, idx) => (
-                          <span
-                            key={idx}
-                            className="px-3 py-1 bg-secondary/30 rounded-full text-sm"
-                          >
-                            {m}
-                          </span>
-                        ))}
-                        {submission.mood_custom && (
-                          <span className="px-3 py-1 bg-accent/30 rounded-full text-sm">
-                            {submission.mood_custom}
-                          </span>
-                        )}
+              <AccordionItem value={submission.id} key={submission.id} className="border-none">
+                <Card
+                  className="rounded-3xl shadow-[var(--shadow-card)] overflow-hidden border-2 transition-colors data-[state=open]:border-primary/50"
+                >
+                  <AccordionTrigger className="w-full p-0 hover:no-underline">
+                    <CardHeader className="w-full text-left bg-gradient-to-r from-primary/10 to-secondary/10">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-2xl font-bold">
+                            {submission.game_title}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground pt-1">
+                            작성자: {submission.student_name} ({formatDate(submission.created_at)})
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSubmissionToDelete(submission);
+                          }}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </Button>
                       </div>
-                    </div>
-                  )}
-
-                  <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-6 space-y-6">
-                    <h3 className="text-xl font-bold text-primary">📖 이야기의 흐름</h3>
-
-                    {submission.story_start && (
+                    </CardHeader>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CardContent className="p-6 pt-4 space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-base font-bold">🌅 시작</h4>
-                        <p className="text-base pl-4 whitespace-pre-wrap">
-                          {submission.story_start}
-                        </p>
+                        <h3 className="text-lg font-bold text-primary">🦸 주인공 이름</h3>
+                        <p className="text-base pl-4">{submission.protagonist_name}</p>
                       </div>
-                    )}
 
-                    {submission.story_middle && (
-                      <div className="space-y-2">
-                        <h4 className="text-base font-bold">⚡ 중간 (주인공이 해야 할 일)</h4>
-                        <p className="text-base pl-4 whitespace-pre-wrap">
-                          {submission.story_middle}
-                        </p>
-                      </div>
-                    )}
+                      {submission.protagonist_traits && (
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-bold text-primary">
+                            ✨ 주인공의 특징이나 성격
+                          </h3>
+                          <p className="text-base pl-4 whitespace-pre-wrap">
+                            {submission.protagonist_traits}
+                          </p>
+                        </div>
+                      )}
 
-                    {(submission.choice_1 || submission.choice_2) && (
-                      <div className="space-y-3">
-                        <h4 className="text-base font-bold">🔀 선택의 순간</h4>
-                        {submission.choice_1 && (
-                          <div className="pl-4 space-y-1">
-                            <p className="font-semibold text-sm">선택 1:</p>
-                            <p className="text-base pl-3 whitespace-pre-wrap">
-                              {submission.choice_1}
-                            </p>
-                          </div>
-                        )}
-                        {submission.choice_2 && (
-                          <div className="pl-4 space-y-1">
-                            <p className="font-semibold text-sm">선택 2:</p>
-                            <p className="text-base pl-3 whitespace-pre-wrap">
-                              {submission.choice_2}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      {submission.story_background && (
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-bold text-primary">
+                            🌍 이야기의 배경
+                          </h3>
+                          <p className="text-base pl-4 whitespace-pre-wrap">
+                            {submission.story_background}
+                          </p>
+                        </div>
+                      )}
 
-                    {(submission.happy_ending || submission.sad_ending) && (
-                      <div className="space-y-3">
-                        <h4 className="text-base font-bold">🎬 끝</h4>
-                        {submission.happy_ending && (
-                          <div className="pl-4 space-y-1">
-                            <p className="font-semibold text-sm">😊 해피 엔딩:</p>
-                            <p className="text-base pl-3 whitespace-pre-wrap">
-                              {submission.happy_ending}
+                      {(submission.mood.length > 0 || submission.mood_custom) && (
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-bold text-primary">
+                            🎭 어떤 분위기인가요?
+                          </h3>
+                          <div className="pl-4 flex flex-wrap gap-2">
+                            {submission.mood.map((m, idx) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1 bg-secondary/30 rounded-full text-sm"
+                              >
+                                {m}
+                              </span>
+                            ))}
+                            {submission.mood_custom && (
+                              <span className="px-3 py-1 bg-accent/30 rounded-full text-sm">
+                                {submission.mood_custom}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-6 space-y-6">
+                        <h3 className="text-xl font-bold text-primary">📖 이야기의 흐름</h3>
+
+                        {submission.story_start && (
+                          <div className="space-y-2">
+                            <h4 className="text-base font-bold">🌅 시작</h4>
+                            <p className="text-base pl-4 whitespace-pre-wrap">
+                              {submission.story_start}
                             </p>
                           </div>
                         )}
-                        {submission.sad_ending && (
-                          <div className="pl-4 space-y-1">
-                            <p className="font-semibold text-sm">😢 새드 엔딩:</p>
-                            <p className="text-base pl-3 whitespace-pre-wrap">
-                              {submission.sad_ending}
+
+                        {submission.story_middle && (
+                          <div className="space-y-2">
+                            <h4 className="text-base font-bold">⚡ 중간 (주인공이 해야 할 일)</h4>
+                            <p className="text-base pl-4 whitespace-pre-wrap">
+                              {submission.story_middle}
                             </p>
+                          </div>
+                        )}
+
+                        {(submission.choice_1 || submission.choice_2) && (
+                          <div className="space-y-3">
+                            <h4 className="text-base font-bold">🔀 선택의 순간</h4>
+                            {submission.choice_1 && (
+                              <div className="pl-4 space-y-1">
+                                <p className="font-semibold text-sm">선택 1:</p>
+                                <p className="text-base pl-3 whitespace-pre-wrap">
+                                  {submission.choice_1}
+                                </p>
+                              </div>
+                            )}
+                            {submission.choice_2 && (
+                              <div className="pl-4 space-y-1">
+                                <p className="font-semibold text-sm">선택 2:</p>
+                                <p className="text-base pl-3 whitespace-pre-wrap">
+                                  {submission.choice_2}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {(submission.happy_ending || submission.sad_ending) && (
+                          <div className="space-y-3">
+                            <h4 className="text-base font-bold">🎬 끝</h4>
+                            {submission.happy_ending && (
+                              <div className="pl-4 space-y-1">
+                                <p className="font-semibold text-sm">😊 해피 엔딩:</p>
+                                <p className="text-base pl-3 whitespace-pre-wrap">
+                                  {submission.happy_ending}
+                                </p>
+                              </div>
+                            )}
+                            {submission.sad_ending && (
+                              <div className="pl-4 space-y-1">
+                                <p className="font-semibold text-sm">😢 새드 엔딩:</p>
+                                <p className="text-base pl-3 whitespace-pre-wrap">
+                                  {submission.sad_ending}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </AccordionContent>
+                </Card>
+              </AccordionItem>
             ))}
-          </div>
+          </Accordion>
         )}
       </div>
+      <AlertDialog
+        open={!!submissionToDelete}
+        onOpenChange={(isOpen) => !isOpen && setSubmissionToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{submissionToDelete?.student_name}" 학생의 "{submissionToDelete?.game_title}" 기획서를 삭제합니다. 이 작업은 되돌릴 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDelete(submissionToDelete?.id || "")}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
