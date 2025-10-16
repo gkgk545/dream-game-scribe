@@ -34,7 +34,7 @@ const Login = () => {
               <Gamepad2 className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              🎮 나만의 스토리 게임 기획서
+              🎮 나만의 스토리 게임 기획
             </h1>
             <p className="text-muted-foreground">
               상상력을 펼쳐보세요!
