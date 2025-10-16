@@ -54,19 +54,9 @@ const Teacher = () => {
       .channel("submissions-changes")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "submissions",
-        },
+        { event: "*", schema: "public", table: "submissions" },
         (payload) => {
-          if (payload.eventType === 'DELETE') {
-            setSubmissions((prev) =>
-              prev.filter((sub) => sub.id !== payload.old.id)
-            );
-          } else {
-            fetchSubmissions();
-          }
+          fetchSubmissions();
         }
       )
       .subscribe();
@@ -102,6 +92,9 @@ const Teacher = () => {
         .eq("id", submissionId);
 
       if (error) throw error;
+
+      // DB에서 성공적으로 삭제된 후, 화면에서도 바로 제거합니다.
+      setSubmissions((prev) => prev.filter((sub) => sub.id !== submissionId));
 
       toast({
         title: "삭제 완료",
