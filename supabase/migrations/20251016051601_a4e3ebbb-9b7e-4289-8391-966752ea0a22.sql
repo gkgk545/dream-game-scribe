@@ -34,6 +34,13 @@ FOR SELECT
 TO public
 USING (true);
 
+-- 모든 사용자가 기획서를 삭제할 수 있도록 허용 (요청사항1)
+CREATE POLICY "Anyone can delete submissions"
+ON public.submissions
+FOR DELETE
+TO public
+USING (true);
+
 -- 실시간 업데이트를 위한 설정
 ALTER TABLE public.submissions REPLICA IDENTITY FULL;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.submissions;
