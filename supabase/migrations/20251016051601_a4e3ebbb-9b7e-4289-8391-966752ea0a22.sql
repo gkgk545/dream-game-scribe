@@ -17,28 +17,28 @@ CREATE TABLE public.submissions (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- RLS 활성화 (공개 데이터이므로 모두가 읽고 쓸 수 있음)
+-- RLS 활성화
 ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
 
 -- 모든 사용자가 제출할 수 있도록 허용
 CREATE POLICY "Anyone can insert submissions"
 ON public.submissions
 FOR INSERT
-TO public
+TO anon, authenticated
 WITH CHECK (true);
 
 -- 모든 사용자가 제출된 기획서를 볼 수 있도록 허용
 CREATE POLICY "Anyone can view submissions"
 ON public.submissions
 FOR SELECT
-TO public
+TO anon, authenticated
 USING (true);
 
--- [수정] 모든 사용자가 기획서를 삭제할 수 있도록 허용 정책 추가
-CREATE POLICY "Anyone can delete submissions"
+-- 익명 사용자가 기획서를 삭제할 수 있도록 허용 정책 수정
+CREATE POLICY "Anonymous users can delete submissions"
 ON public.submissions
 FOR DELETE
-TO public
+TO anon
 USING (true);
 
 -- 실시간 업데이트를 위한 설정
