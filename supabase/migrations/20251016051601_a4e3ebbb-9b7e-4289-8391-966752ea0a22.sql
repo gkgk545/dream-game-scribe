@@ -34,7 +34,7 @@ FOR SELECT
 TO public
 USING (true);
 
--- 모든 사용자가 기획서를 삭제할 수 있도록 허용 (요청사항1)
+-- [수정] 모든 사용자가 기획서를 삭제할 수 있도록 허용 정책 추가
 CREATE POLICY "Anyone can delete submissions"
 ON public.submissions
 FOR DELETE
