@@ -59,8 +59,14 @@ const Teacher = () => {
           schema: "public",
           table: "submissions",
         },
-        () => {
-          fetchSubmissions();
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setSubmissions((prev) =>
+              prev.filter((sub) => sub.id !== payload.old.id)
+            );
+          } else {
+            fetchSubmissions();
+          }
         }
       )
       .subscribe();
@@ -97,7 +103,6 @@ const Teacher = () => {
 
       if (error) throw error;
 
-      setSubmissions((prev) => prev.filter((sub) => sub.id !== submissionId));
       toast({
         title: "삭제 완료",
         description: "기획서가 성공적으로 삭제되었습니다.",
