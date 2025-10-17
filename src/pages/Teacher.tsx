@@ -3,7 +3,9 @@ import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, ArrowLeft, Trash2 } from "lucide-react";
+import { BookOpen, ArrowLeft, Trash2, Download } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
+import { SubmissionPDF } from "@/components/SubmissionPDF";
 import {
   Accordion,
   AccordionContent,
@@ -112,6 +114,30 @@ const Teacher = () => {
     }
   };
 
+  const handleDownloadPDF = async (submission: Submission) => {
+    try {
+      const blob = await pdf(<SubmissionPDF submission={submission} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${submission.student_name}_${submission.game_title}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "PDF 다운로드 완료",
+        description: "기획서가 PDF로 저장되었습니다.",
+      });
+    } catch (error) {
+      console.error("PDF 생성 실패:", error);
+      toast({
+        title: "PDF 생성 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString("ko-KR", {
@@ -167,7 +193,7 @@ const Teacher = () => {
                   <AccordionTrigger className="w-full p-0 hover:no-underline">
                     <CardHeader className="w-full text-left bg-gradient-to-r from-primary/10 to-secondary/10">
                       <div className="flex items-center justify-between">
-                        <div>
+                        <div className="flex-1">
                           <CardTitle className="text-2xl font-bold">
                             {submission.game_title}
                           </CardTitle>
@@ -175,17 +201,30 @@ const Teacher = () => {
                             작성자: {submission.student_name} ({formatDate(submission.created_at)})
                           </p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10 z-10"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSubmissionToDelete(submission);
-                          }}
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary/70 hover:text-primary hover:bg-primary/10 rounded-full h-10 w-10 z-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadPDF(submission);
+                            }}
+                          >
+                            <Download className="w-5 h-5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10 z-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSubmissionToDelete(submission);
+                            }}
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </Button>
+                        </div>
                       </div>
                     </CardHeader>
                   </AccordionTrigger>
