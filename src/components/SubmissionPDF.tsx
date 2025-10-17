@@ -1,15 +1,15 @@
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// Register Korean font - using CDN that supports CORS
+// Register Korean font
 Font.register({
-  family: 'NotoSansKR',
+  family: 'Nanum Gothic',
   fonts: [
     {
-      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/NanumGothic.woff',
+      src: 'https://cdn.jsdelivr.net/gh/fonts-archive/NanumGothic/NanumGothic.woff',
       fontWeight: 'normal',
     },
     {
-      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/NanumGothicBold.woff',
+      src: 'https://cdn.jsdelivr.net/gh/fonts-archive/NanumGothic/NanumGothicBold.woff',
       fontWeight: 'bold',
     },
   ],
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'NotoSansKR',
+    fontFamily: 'Nanum Gothic',
     backgroundColor: '#ffffff',
   },
   header: {
