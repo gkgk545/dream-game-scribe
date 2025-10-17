@@ -1,9 +1,18 @@
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// Register Korean font
+// Register Korean font - using CDN that supports CORS
 Font.register({
   family: 'NotoSansKR',
-  src: 'https://fonts.gstatic.com/s/notosanskr/v36/Pby7FmXiEBPT4ITbgNA5CgmOelzI7rsrAQ.ttf',
+  fonts: [
+    {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/NanumGothic.woff',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/NanumGothicBold.woff',
+      fontWeight: 'bold',
+    },
+  ],
 });
 
 const styles = StyleSheet.create({
