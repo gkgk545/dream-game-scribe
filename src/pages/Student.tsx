@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ const Student = () => {
   const { toast } = useToast();
   const studentName = location.state?.studentName || "학생";
 
+  const [existingSubmissionId, setExistingSubmissionId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     gameTitle: "",
     protagonistName: "",
@@ -29,6 +30,49 @@ const Student = () => {
     happyEnding: "",
     sadEnding: "",
   });
+
+  useEffect(() => {
+    const loadExistingSubmission = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("submissions")
+          .select("*")
+          .eq("student_name", studentName)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setExistingSubmissionId(data.id);
+          setFormData({
+            gameTitle: data.game_title || "",
+            protagonistName: data.protagonist_name || "",
+            protagonistTraits: data.protagonist_traits || "",
+            storyBackground: data.story_background || "",
+            mood: data.mood || [],
+            moodCustom: data.mood_custom || "",
+            storyStart: data.story_start || "",
+            storyMiddle: data.story_middle || "",
+            choice1: data.choice_1 || "",
+            choice2: data.choice_2 || "",
+            happyEnding: data.happy_ending || "",
+            sadEnding: data.sad_ending || "",
+          });
+
+          toast({
+            title: "이전 작성 내용을 불러왔습니다",
+            description: "수정하고 다시 제출할 수 있습니다.",
+          });
+        }
+      } catch (error) {
+        console.error("기존 제출물 불러오기 실패:", error);
+      }
+    };
+
+    loadExistingSubmission();
+  }, [studentName, toast]);
 
   const moodOptions = [
     "신나는 모험",
@@ -60,7 +104,7 @@ const Student = () => {
     }
 
     try {
-      const { error } = await supabase.from("submissions").insert({
+      const submissionData = {
         student_name: studentName,
         game_title: formData.gameTitle,
         protagonist_name: formData.protagonistName,
@@ -74,13 +118,28 @@ const Student = () => {
         choice_2: formData.choice2,
         happy_ending: formData.happyEnding,
         sad_ending: formData.sadEnding,
-      });
+      };
+
+      let error;
+
+      if (existingSubmissionId) {
+        // 기존 제출물이 있으면 업데이트
+        ({ error } = await supabase
+          .from("submissions")
+          .update(submissionData)
+          .eq("id", existingSubmissionId));
+      } else {
+        // 새로운 제출
+        ({ error } = await supabase.from("submissions").insert(submissionData));
+      }
 
       if (error) throw error;
 
       toast({
-        title: "🎉 제출 완료!",
-        description: "기획서가 성공적으로 제출되었습니다!",
+        title: existingSubmissionId ? "🎉 수정 완료!" : "🎉 제출 완료!",
+        description: existingSubmissionId
+          ? "기획서가 성공적으로 수정되었습니다!"
+          : "기획서가 성공적으로 제출되었습니다!",
       });
 
       setTimeout(() => {
@@ -310,7 +369,7 @@ const Student = () => {
               type="submit"
               className="w-full h-14 text-lg font-bold rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
             >
-              ✨ 제출하기
+              {existingSubmissionId ? "✏️ 수정하기" : "✨ 제출하기"}
             </Button>
           </form>
         </div>
