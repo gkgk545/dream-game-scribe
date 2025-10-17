@@ -76,7 +76,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 5,
   },
-  fontSize: 12,
+  storySectionTitle: {
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#0f172a',
     marginBottom: 4,
