@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#6366f1',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#6366f1',
     marginBottom: 8,
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#6366f1',
     marginBottom: 5,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e2e8f0',
   },
   content: {
-    fontSize: 9,
+    fontSize: 11,
     lineHeight: 1.5,
     color: '#1e293b',
     marginBottom: 3,
@@ -76,14 +76,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 5,
   },
-  storySectionTitle: {
-    fontSize: 10,
+  fontSize: 12,
     fontWeight: 'bold',
     color: '#0f172a',
     marginBottom: 4,
   },
   subContent: {
-    fontSize: 8,
+    fontSize: 10,
     lineHeight: 1.4,
     color: '#475569',
     marginLeft: 8,
@@ -140,13 +139,13 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{submission.game_title}</Text>
-          <Text style={styles.subtitle}>Author: {submission.student_name}</Text>
-          <Text style={styles.subtitle}>Date: {formatDate(submission.created_at)}</Text>
+          <Text style={styles.subtitle}>작성자: {submission.student_name}</Text>
+          <Text style={styles.subtitle}>제출일: {formatDate(submission.created_at)}</Text>
         </View>
 
         {/* Protagonist */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Protagonist</Text>
+          <Text style={styles.sectionTitle}>주인공</Text>
           <Text style={styles.content}>{submission.protagonist_name}</Text>
           {submission.protagonist_traits && (
             <Text style={styles.subContent}>{submission.protagonist_traits}</Text>
@@ -156,7 +155,7 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
         {/* Story Background */}
         {submission.story_background && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Story Background</Text>
+            <Text style={styles.sectionTitle}>이야기 배경</Text>
             <Text style={styles.content}>{submission.story_background}</Text>
           </View>
         )}
@@ -164,7 +163,7 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
         {/* Mood */}
         {(submission.mood.length > 0 || submission.mood_custom) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Mood</Text>
+            <Text style={styles.sectionTitle}>분위기</Text>
             <View style={styles.moodContainer}>
               {submission.mood.map((m, idx) => (
                 <Text key={idx} style={styles.moodTag}>{m}</Text>
@@ -178,12 +177,12 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
 
         {/* Story Flow */}
         <View style={styles.storySection}>
-          <Text style={styles.storySectionTitle}>Story Flow</Text>
+          <Text style={styles.storySectionTitle}>이야기 흐름</Text>
           
           {/* Beginning */}
           {submission.story_start && (
             <View style={{ marginBottom: 6 }}>
-              <Text style={styles.label}>Beginning</Text>
+              <Text style={styles.label}>시작</Text>
               <Text style={styles.subContent}>{submission.story_start}</Text>
             </View>
           )}
@@ -191,7 +190,7 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
           {/* Middle */}
           {submission.story_middle && (
             <View style={{ marginBottom: 6 }}>
-              <Text style={styles.label}>Middle</Text>
+              <Text style={styles.label}>중간</Text>
               <Text style={styles.subContent}>{submission.story_middle}</Text>
             </View>
           )}
@@ -199,12 +198,12 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
           {/* Choices */}
           {(submission.choice_1 || submission.choice_2) && (
             <View style={{ marginBottom: 6 }}>
-              <Text style={styles.label}>Choices</Text>
+              <Text style={styles.label}>선택</Text>
               {submission.choice_1 && (
-                <Text style={styles.subContent}>Choice 1: {submission.choice_1}</Text>
+                <Text style={styles.subContent}>선택 1: {submission.choice_1}</Text>
               )}
               {submission.choice_2 && (
-                <Text style={styles.subContent}>Choice 2: {submission.choice_2}</Text>
+                <Text style={styles.subContent}>선택 2: {submission.choice_2}</Text>
               )}
             </View>
           )}
@@ -214,13 +213,13 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
             <View style={styles.twoColumn}>
               {submission.happy_ending && (
                 <View style={styles.column}>
-                  <Text style={styles.label}>Happy Ending</Text>
+                  <Text style={styles.label}>해피 엔딩</Text>
                   <Text style={styles.subContent}>{submission.happy_ending}</Text>
                 </View>
               )}
               {submission.sad_ending && (
                 <View style={styles.column}>
-                  <Text style={styles.label}>Sad Ending</Text>
+                  <Text style={styles.label}>새드 엔딩</Text>
                   <Text style={styles.subContent}>{submission.sad_ending}</Text>
                 </View>
               )}
