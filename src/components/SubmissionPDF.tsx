@@ -1,11 +1,16 @@
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
-// 나눔고딕 폰트는 기본 제공되지 않으므로 기본 폰트 사용
+// Register Korean font
+Font.register({
+  family: 'NotoSansKR',
+  src: 'https://fonts.gstatic.com/s/notosanskr/v36/Pby7FmXiEBPT4ITbgNA5CgmOelzI7rsrAQ.ttf',
+});
+
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: 'NotoSansKR',
     backgroundColor: '#ffffff',
   },
   header: {
