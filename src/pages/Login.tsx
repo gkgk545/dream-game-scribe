@@ -56,7 +56,7 @@ const Login = () => {
                 <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors cursor-pointer">
                   <RadioGroupItem value="exhibition" id="exhibition" />
                   <Label htmlFor="exhibition" className="cursor-pointer flex-1 text-base">
-                    전시 보기
+                    계획 공유
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors cursor-pointer">
