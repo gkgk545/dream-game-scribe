@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Gamepad2 } from "lucide-react";
 
 const Login = () => {
-  const [role, setRole] = useState<"student" | "teacher">("student");
+  const [role, setRole] = useState<"student" | "teacher" | "exhibition">("student");
   const [studentName, setStudentName] = useState("");
   const navigate = useNavigate();
 
@@ -20,8 +20,10 @@ const Login = () => {
         return;
       }
       navigate("/student", { state: { studentName } });
-    } else {
+    } else if (role === "teacher") {
       navigate("/teacher");
+    } else {
+      navigate("/exhibition");
     }
   };
 
@@ -44,11 +46,17 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <Label className="text-base font-semibold">나는...</Label>
-              <RadioGroup value={role} onValueChange={(value) => setRole(value as "student" | "teacher")}>
+              <RadioGroup value={role} onValueChange={(value) => setRole(value as "student" | "teacher" | "exhibition")}>
                 <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors cursor-pointer">
                   <RadioGroupItem value="student" id="student" />
                   <Label htmlFor="student" className="cursor-pointer flex-1 text-base">
                     학생
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors cursor-pointer">
+                  <RadioGroupItem value="exhibition" id="exhibition" />
+                  <Label htmlFor="exhibition" className="cursor-pointer flex-1 text-base">
+                    전시 보기
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border hover:border-primary transition-colors cursor-pointer">

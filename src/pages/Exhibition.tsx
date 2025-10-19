@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, ArrowLeft, Trash2, Download } from "lucide-react";
+import { BookOpen, ArrowLeft, Download } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { SubmissionPDF } from "@/components/SubmissionPDF";
 import {
@@ -14,16 +12,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface Submission {
@@ -44,35 +32,11 @@ interface Submission {
   created_at: string;
 }
 
-const Teacher = () => {
+const Exhibition = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submissionToDelete, setSubmissionToDelete] = useState<Submission | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === "4321") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("teacherAuth", "true");
-    } else {
-      toast({
-        title: "비밀번호 오류",
-        description: "비밀번호가 올바르지 않습니다.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  useEffect(() => {
-    const authStatus = sessionStorage.getItem("teacherAuth");
-    if (authStatus === "true") {
-      setIsAuthenticated(true);
-    }
-  }, []);
 
   useEffect(() => {
     fetchSubmissions();
@@ -106,36 +70,6 @@ const Teacher = () => {
       console.error("데이터 가져오기 실패:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (submissionId: string) => {
-    if (!submissionId) return;
-
-    try {
-      const { error } = await supabase
-        .from("submissions")
-        .delete()
-        .eq("id", submissionId);
-
-      if (error) throw error;
-
-      // DB에서 성공적으로 삭제된 후, 화면에서도 바로 제거합니다.
-      setSubmissions((prev) => prev.filter((sub) => sub.id !== submissionId));
-
-      toast({
-        title: "삭제 완료",
-        description: "기획서가 성공적으로 삭제되었습니다.",
-      });
-    } catch (error) {
-      console.error("삭제 실패:", error);
-      toast({
-        title: "삭제 실패",
-        description: "다시 시도해주세요.",
-        variant: "destructive",
-      });
-    } finally {
-      setSubmissionToDelete(null);
     }
   };
 
@@ -174,60 +108,6 @@ const Teacher = () => {
     });
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 p-4">
-        <div className="w-full max-w-md">
-          <div className="bg-card rounded-[2rem] shadow-[var(--shadow-card)] p-8 space-y-8">
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mb-2">
-                <BookOpen className="w-10 h-10 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                교사 페이지
-              </h1>
-              <p className="text-muted-foreground">
-                비밀번호를 입력하세요
-              </p>
-            </div>
-
-            <form onSubmit={handlePasswordSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-base font-semibold">
-                  비밀번호
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="비밀번호를 입력하세요"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 text-base rounded-xl"
-                />
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full h-12 text-lg font-semibold rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
-              >
-                입장하기
-              </Button>
-            </form>
-
-            <Button
-              onClick={() => navigate("/")}
-              variant="outline"
-              className="w-full rounded-xl"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              처음으로
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -237,7 +117,7 @@ const Teacher = () => {
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              학생들의 기획서 제출 현황
+              게임 기획서 전시
             </h1>
           </div>
           <Button
@@ -258,7 +138,7 @@ const Teacher = () => {
           <Card className="rounded-3xl shadow-[var(--shadow-card)]">
             <CardContent className="py-12 text-center">
               <p className="text-lg text-muted-foreground">
-                아직 제출된 기획서가 없습니다.
+                아직 전시할 기획서가 없습니다.
               </p>
             </CardContent>
           </Card>
@@ -291,17 +171,6 @@ const Teacher = () => {
                             }}
                           >
                             <Download className="w-5 h-5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-full h-10 w-10 z-10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSubmissionToDelete(submission);
-                            }}
-                          >
-                            <Trash2 className="w-5 h-5" />
                           </Button>
                         </div>
                       </div>
@@ -432,30 +301,8 @@ const Teacher = () => {
           </Accordion>
         )}
       </div>
-      <AlertDialog
-        open={!!submissionToDelete}
-        onOpenChange={(isOpen) => !isOpen && setSubmissionToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>정말 삭제하시겠습니까?</AlertDialogTitle>
-            <AlertDialogDescription>
-              "{submissionToDelete?.student_name}" 학생의 "{submissionToDelete?.game_title}" 기획서를 삭제합니다. 이 작업은 되돌릴 수 없습니다.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleDelete(submissionToDelete?.id || "")}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              삭제
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
 
-export default Teacher;
+export default Exhibition;
