@@ -35,6 +35,8 @@ interface Submission {
   story_background: string;
   mood: string[];
   mood_custom: string | null;
+  game_elements: string[];
+  game_elements_custom: string | null;
   story_start: string;
   story_middle: string;
   choice_1: string;
@@ -353,6 +355,29 @@ const Teacher = () => {
                             {submission.mood_custom && (
                               <span className="px-3 py-1 bg-accent/30 rounded-full text-sm">
                                 {submission.mood_custom}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {(submission.game_elements.length > 0 || submission.game_elements_custom) && (
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-bold text-primary">
+                            🎮 사용하고자 하는 게임 요소
+                          </h3>
+                          <div className="pl-4 flex flex-wrap gap-2">
+                            {submission.game_elements.map((element, idx) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1 bg-secondary/30 rounded-full text-sm"
+                              >
+                                {element}
+                              </span>
+                            ))}
+                            {submission.game_elements_custom && (
+                              <span className="px-3 py-1 bg-accent/30 rounded-full text-sm">
+                                {submission.game_elements_custom}
                               </span>
                             )}
                           </div>

@@ -114,6 +114,8 @@ interface SubmissionPDFProps {
     story_background: string;
     mood: string[];
     mood_custom: string | null;
+    game_elements: string[];
+    game_elements_custom: string | null;
     story_start: string;
     story_middle: string;
     choice_1: string;
@@ -171,6 +173,21 @@ export const SubmissionPDF = ({ submission }: SubmissionPDFProps) => {
               ))}
               {submission.mood_custom && (
                 <Text style={styles.moodTag}>{submission.mood_custom}</Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Game Elements */}
+        {(submission.game_elements.length > 0 || submission.game_elements_custom) && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>게임 요소</Text>
+            <View style={styles.moodContainer}>
+              {submission.game_elements.map((element, idx) => (
+                <Text key={idx} style={styles.moodTag}>{element}</Text>
+              ))}
+              {submission.game_elements_custom && (
+                <Text style={styles.moodTag}>{submission.game_elements_custom}</Text>
               )}
             </View>
           </View>
