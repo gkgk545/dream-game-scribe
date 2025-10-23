@@ -23,6 +23,8 @@ const Student = () => {
     storyBackground: "",
     mood: [] as string[],
     moodCustom: "",
+    gameElements: [] as string[],
+    gameElementsCustom: "",
     storyStart: "",
     storyMiddle: "",
     choice1: "",
@@ -53,6 +55,8 @@ const Student = () => {
             storyBackground: data.story_background || "",
             mood: data.mood || [],
             moodCustom: data.mood_custom || "",
+            gameElements: data.game_elements || [],
+            gameElementsCustom: data.game_elements_custom || "",
             storyStart: data.story_start || "",
             storyMiddle: data.story_middle || "",
             choice1: data.choice_1 || "",
@@ -81,12 +85,27 @@ const Student = () => {
     "웃기는 코미디",
   ];
 
+  const gameElementOptions = [
+    "퀴즈(질문 - 대답) 방식",
+    "아이템 획득 방식",
+    "잠금 해제 방식",
+  ];
+
   const handleMoodChange = (mood: string, checked: boolean) => {
     setFormData((prev) => ({
       ...prev,
       mood: checked
         ? [...prev.mood, mood]
         : prev.mood.filter((m) => m !== mood),
+    }));
+  };
+
+  const handleGameElementChange = (element: string, checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      gameElements: checked
+        ? [...prev.gameElements, element]
+        : prev.gameElements.filter((e) => e !== element),
     }));
   };
 
@@ -112,6 +131,8 @@ const Student = () => {
         story_background: formData.storyBackground,
         mood: formData.mood,
         mood_custom: formData.moodCustom,
+        game_elements: formData.gameElements,
+        game_elements_custom: formData.gameElementsCustom,
         story_start: formData.storyStart,
         story_middle: formData.storyMiddle,
         choice_1: formData.choice1,
@@ -259,6 +280,46 @@ const Student = () => {
                     value={formData.moodCustom}
                     onChange={(e) =>
                       setFormData({ ...formData, moodCustom: e.target.value })
+                    }
+                    placeholder="직접 입력"
+                    className="flex-1 rounded-lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-lg font-semibold">사용하고자 하는 게임 요소는 무엇이 있나요?</Label>
+              <div className="space-y-3">
+                {gameElementOptions.map((element) => (
+                  <div key={element} className="flex items-center space-x-3 p-3 rounded-xl bg-muted/50">
+                    <Checkbox
+                      id={element}
+                      checked={formData.gameElements.includes(element)}
+                      onCheckedChange={(checked) =>
+                        handleGameElementChange(element, checked as boolean)
+                      }
+                    />
+                    <Label htmlFor={element} className="cursor-pointer flex-1">
+                      {element}
+                    </Label>
+                  </div>
+                ))}
+                <div className="flex items-center space-x-3 p-3 rounded-xl bg-muted/50">
+                  <Checkbox
+                    id="gameElementCustom"
+                    checked={formData.gameElementsCustom !== ""}
+                    onCheckedChange={(checked) => {
+                      if (!checked) setFormData({ ...formData, gameElementsCustom: "" });
+                    }}
+                  />
+                  <Label htmlFor="gameElementCustom" className="cursor-pointer">
+                    직접 쓰기:
+                  </Label>
+                  <Input
+                    value={formData.gameElementsCustom}
+                    onChange={(e) =>
+                      setFormData({ ...formData, gameElementsCustom: e.target.value })
                     }
                     placeholder="직접 입력"
                     className="flex-1 rounded-lg"

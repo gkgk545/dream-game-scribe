@@ -19,6 +19,8 @@ export type Database = {
           choice_1: string
           choice_2: string
           created_at: string
+          game_elements: string[]
+          game_elements_custom: string | null
           game_title: string
           happy_ending: string
           id: string
@@ -36,6 +38,8 @@ export type Database = {
           choice_1: string
           choice_2: string
           created_at?: string
+          game_elements?: string[]
+          game_elements_custom?: string | null
           game_title: string
           happy_ending: string
           id?: string
@@ -53,6 +57,8 @@ export type Database = {
           choice_1?: string
           choice_2?: string
           created_at?: string
+          game_elements?: string[]
+          game_elements_custom?: string | null
           game_title?: string
           happy_ending?: string
           id?: string
