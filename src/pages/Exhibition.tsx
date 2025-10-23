@@ -3,7 +3,7 @@ import { supabase } from "../integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, ArrowLeft, Download } from "lucide-react";
+import { BookOpen, ArrowLeft, Download, Heart } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { SubmissionPDF } from "@/components/SubmissionPDF";
 import {
@@ -31,16 +31,23 @@ interface Submission {
   choice_2: string;
   happy_ending: string;
   sad_ending: string;
+  vote_count: number;
   created_at: string;
 }
 
 const Exhibition = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [votedSubmissions, setVotedSubmissions] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load voted submissions from localStorage
+    const voted = localStorage.getItem("votedSubmissions");
+    if (voted) {
+      setVotedSubmissions(new Set(JSON.parse(voted)));
+    }
     fetchSubmissions();
 
     const channel = supabase
@@ -93,6 +100,58 @@ const Exhibition = () => {
       console.error("PDF 생성 실패:", error);
       toast({
         title: "PDF 생성 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleVote = async (submissionId: string) => {
+    if (votedSubmissions.has(submissionId)) {
+      toast({
+        title: "이미 투표하셨습니다",
+        description: "한 기획서에는 한 번만 투표할 수 있습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Get current vote count
+      const submission = submissions.find(s => s.id === submissionId);
+      if (!submission) return;
+
+      // Update vote count
+      const { error } = await supabase
+        .from("submissions")
+        .update({ vote_count: submission.vote_count + 1 })
+        .eq("id", submissionId);
+
+      if (error) throw error;
+
+      // Update local state
+      setSubmissions(prev =>
+        prev.map(s =>
+          s.id === submissionId
+            ? { ...s, vote_count: s.vote_count + 1 }
+            : s
+        )
+      );
+
+      // Save to localStorage
+      const newVoted = new Set(votedSubmissions);
+      newVoted.add(submissionId);
+      setVotedSubmissions(newVoted);
+      localStorage.setItem("votedSubmissions", JSON.stringify([...newVoted]));
+
+      toast({
+        title: "투표 완료!",
+        description: "좋아하는 기획서에 투표했습니다.",
+      });
+    } catch (error) {
+      console.error("투표 실패:", error);
+      toast({
+        title: "투표 실패",
         description: "다시 시도해주세요.",
         variant: "destructive",
       });
@@ -163,6 +222,28 @@ const Exhibition = () => {
                           </p>
                         </div>
                         <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`rounded-full h-10 w-10 z-10 ${
+                              votedSubmissions.has(submission.id)
+                                ? "text-red-500 hover:text-red-600 hover:bg-red-50"
+                                : "text-primary/70 hover:text-primary hover:bg-primary/10"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(submission.id);
+                            }}
+                          >
+                            <Heart 
+                              className={`w-5 h-5 ${
+                                votedSubmissions.has(submission.id) ? "fill-current" : ""
+                              }`} 
+                            />
+                          </Button>
+                          <div className="flex items-center justify-center min-w-[2rem] text-sm font-semibold text-primary">
+                            {submission.vote_count}
+                          </div>
                           <Button
                             variant="ghost"
                             size="icon"

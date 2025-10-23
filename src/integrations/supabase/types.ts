@@ -33,6 +33,7 @@ export type Database = {
           story_middle: string
           story_start: string
           student_name: string
+          vote_count: number
         }
         Insert: {
           choice_1: string
@@ -52,6 +53,7 @@ export type Database = {
           story_middle: string
           story_start: string
           student_name: string
+          vote_count?: number
         }
         Update: {
           choice_1?: string
@@ -71,6 +73,7 @@ export type Database = {
           story_middle?: string
           story_start?: string
           student_name?: string
+          vote_count?: number
         }
         Relationships: []
       }
